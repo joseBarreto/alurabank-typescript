@@ -14,7 +14,5 @@
     "@types/jquery": "^2.0.42",
     "typescript": "^2.3.2"
   },
-  "dependencies": {
-    "moment": "^2.29.1"
-  }
+  "dependencies": {}
 }
