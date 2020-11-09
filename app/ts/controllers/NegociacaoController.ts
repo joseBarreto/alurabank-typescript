@@ -4,6 +4,7 @@ import { domInject, logarTempoDeExecucao } from "../helpers/decorators/index";
 
 export class NegociacaoController {
 
+    private readonly _urlAPI: string = 'http://localhost:8080/dados';
     @domInject('#data')
     private _inputData: JQuery;
 
@@ -18,7 +19,7 @@ export class NegociacaoController {
     private _mensagemView: MensagemView;
 
     constructor() {
-       
+
         this._negociacoes = new Negociacoes();
         this._negociacoesView = new NegociacoesView('#negociacoesView');
         this._mensagemView = new MensagemView("#mensagemView");
@@ -26,7 +27,7 @@ export class NegociacaoController {
         this._negociacoesView.update(this._negociacoes);
 
     }
-    
+
     @logarTempoDeExecucao()
     adiciona(event: Event) {
 
@@ -53,6 +54,30 @@ export class NegociacaoController {
 
     private _ehDiaUtils(data: Date): boolean {
         return data.getDay() != DiaDaSemana.Domingo && data.getDay() != DiaDaSemana.Sabado;
+    }
+
+    @logarTempoDeExecucao()
+    importaDados() {
+        function isOk(res: Response) {
+            if (res.ok) {
+                return res;
+            } else {
+                throw new Error(res.statusText);
+            }
+
+        }
+
+        fetch(this._urlAPI)
+            .then(res => isOk(res))
+            .then(res => res.json())
+            .then((dados: any[]) => {
+                dados
+                    .map(dado => new Negociacao(new Date(), dado.vezes, dado.montante))
+                    .forEach(negociacao => this._negociacoes.adiciona(negociacao))
+
+                this._negociacoesView.update(this._negociacoes);
+            })
+            .catch(err => console.log('errooo: ' + err.message));
     }
 }
 
